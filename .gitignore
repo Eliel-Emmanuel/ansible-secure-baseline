@@ -1,0 +1,8 @@
+.vagrant/
+vagrant/keys/
+*.retry
+.vault_pass
+.venv/
+__pycache__/
+Thumbs.db
+desktop.ini
