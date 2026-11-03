@@ -1,3 +1,30 @@
+require "fileutils"
+
+KEY_DIR = File.join(__dir__, "vagrant", "keys")
+KEY_PATH = File.join(KEY_DIR, "lab_ed25519")
+
+unless File.exist?(KEY_PATH)
+  FileUtils.mkdir_p(KEY_DIR)
+  ok = system("ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", "ansible@lab", "-f", KEY_PATH)
+  abort("Échec de ssh-keygen : vérifiez que le client OpenSSH de Windows est installé.") unless ok
+end
+
+PUBKEY = File.read("#{KEY_PATH}.pub").strip
+
+HOSTS = <<~TEXTE
+  192.168.56.20 ctrl.lab.test ctrl
+  192.168.56.21 web01.lab.test web01
+  192.168.56.22 db01.lab.test db01
+  192.168.56.23 mon01.lab.test mon01
+TEXTE
+
+COMMON = <<~SHELL
+  set -euo pipefail
+  sed -i '/lab\\.test/d' /etc/hosts
+  echo "$LAB_HOSTS" >> /etc/hosts
+  timedatectl set-timezone Africa/Lagos
+SHELL
+
 SUBNET = "192.168.56"
 NODES = {
   "web01" => [21, 768, 1],
@@ -11,6 +38,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
   config.vm.boot_timeout = 600
   config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.provision "hosts", type: "shell", inline: COMMON, env: { "LAB_HOSTS" => HOSTS }
 
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
