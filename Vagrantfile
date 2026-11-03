@@ -7,6 +7,9 @@ unless File.exist?(KEY_PATH)
   FileUtils.mkdir_p(KEY_DIR)
   ok = system("ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", "ansible@lab", "-f", KEY_PATH)
   abort("Échec de ssh-keygen : vérifiez que le client OpenSSH de Windows est installé.") unless ok
+  if Vagrant::Util::Platform.windows?
+    system("icacls", KEY_PATH, "/inheritance:r", "/grant:r", "#{ENV['USERNAME']}:R")
+  end
 end
 
 PUBKEY = File.read("#{KEY_PATH}.pub").strip
@@ -23,6 +26,18 @@ COMMON = <<~SHELL
   sed -i '/lab\\.test/d' /etc/hosts
   echo "$LAB_HOSTS" >> /etc/hosts
   timedatectl set-timezone Africa/Lagos
+SHELL
+
+MANAGED = <<~SHELL
+  set -euo pipefail
+  id ansible >/dev/null 2>&1 || useradd -m -s /bin/bash ansible
+  install -d -m 700 -o ansible -g ansible /home/ansible/.ssh
+  echo "$LAB_PUBKEY" > /home/ansible/.ssh/authorized_keys
+  chown ansible:ansible /home/ansible/.ssh/authorized_keys
+  chmod 600 /home/ansible/.ssh/authorized_keys
+  echo 'ansible ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ansible
+  chmod 440 /etc/sudoers.d/ansible
+  visudo -cf /etc/sudoers.d/ansible
 SHELL
 
 SUBNET = "192.168.56"
@@ -60,6 +75,7 @@ Vagrant.configure("2") do |config|
     config.vm.define nom do |m|
       m.vm.hostname = nom
       m.vm.network "private_network", ip: "#{SUBNET}.#{ip}"
+      m.vm.provision "compte-ansible", type: "shell", inline: MANAGED, env: { "LAB_PUBKEY" => PUBKEY }
       m.vm.provider "virtualbox" do |vb|
         vb.name = "asb-#{nom}"
         vb.memory = ram
