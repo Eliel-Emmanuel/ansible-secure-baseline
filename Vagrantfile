@@ -40,6 +40,26 @@ MANAGED = <<~SHELL
   visudo -cf /etc/sudoers.d/ansible
 SHELL
 
+CTRL_ROOT = <<~SHELL
+  set -euo pipefail
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -q
+  apt-get install -y -q git make jq python3-venv python3-pip docker.io
+  usermod -aG docker vagrant
+SHELL
+
+CTRL_USER = <<~SHELL
+  set -euo pipefail
+  install -d -m 700 ~/.ssh
+  install -m 600 ~/projet/vagrant/keys/lab_ed25519 ~/.ssh/lab_ed25519
+  [ -d ~/.venvs/ansible ] || python3 -m venv ~/.venvs/ansible
+  ~/.venvs/ansible/bin/pip install -q --upgrade pip
+  ~/.venvs/ansible/bin/pip install -q -r ~/projet/requirements-dev.txt
+  cd ~/projet && ~/.venvs/ansible/bin/ansible-galaxy collection install -r requirements.yml
+  grep -q 'venvs/ansible' ~/.bashrc || \\
+    echo 'source ~/.venvs/ansible/bin/activate && cd ~/projet' >> ~/.bashrc
+SHELL
+
 SUBNET = "192.168.56"
 NODES = {
   "web01" => [21, 768, 1],
@@ -66,6 +86,9 @@ Vagrant.configure("2") do |config|
     m.vm.synced_folder ".", "/home/vagrant/projet",
       owner: "vagrant", group: "vagrant",
       mount_options: ["dmode=755", "fmode=644"]
+
+    m.vm.provision "outils", type: "shell", inline: CTRL_ROOT
+    m.vm.provision "ansible-env", type: "shell", privileged: false, inline: CTRL_USER
 
     m.vm.provider "virtualbox" do |vb|
       vb.name = "asb-ctrl"
