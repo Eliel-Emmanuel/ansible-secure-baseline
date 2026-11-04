@@ -63,6 +63,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "ctrl" do |m|
     m.vm.hostname = "ctrl"
     m.vm.network "private_network", ip: "#{SUBNET}.20"
+    m.vm.synced_folder ".", "/home/vagrant/projet",
+      owner: "vagrant", group: "vagrant",
+      mount_options: ["dmode=755", "fmode=644"]
 
     m.vm.provider "virtualbox" do |vb|
       vb.name = "asb-ctrl"
