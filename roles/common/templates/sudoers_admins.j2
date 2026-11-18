@@ -1,0 +1,7 @@
+{{ ansible_managed | comment }}
+
+{% if common_sudo_sans_mot_de_passe %}
+%{{ common_groupe_admins }} ALL=(ALL:ALL) NOPASSWD: ALL
+{% else %}
+%{{ common_groupe_admins }} ALL=(ALL:ALL) ALL
+{% endif %}

@@ -1,0 +1,37 @@
+---
+- name: Créer le groupe des administrateurs
+  ansible.builtin.group:
+    name: "{{ common_groupe_admins }}"
+    state: present
+
+- name: Créer les comptes d'administration
+  ansible.builtin.user:
+    name: "{{ item.nom }}"
+    comment: "{{ item.commentaire }}"
+    shell: /bin/bash
+    groups: "{{ common_groupe_admins }}"
+    append: true
+    password: "{{ item.mot_de_passe | password_hash('sha512') }}"
+    update_password: on_create
+  loop: "{{ common_admins }}"
+  loop_control:
+    label: "{{ item.nom }}"
+  no_log: true
+
+- name: Installer la clé SSH de chaque administrateur
+  ansible.posix.authorized_key:
+    user: "{{ item.nom }}"
+    key: "{{ item.cle_ssh }}"
+    exclusive: true
+  loop: "{{ common_admins }}"
+  loop_control:
+    label: "{{ item.nom }}"
+
+- name: Donner les droits sudo au groupe des administrateurs
+  ansible.builtin.template:
+    src: sudoers_admins.j2
+    dest: /etc/sudoers.d/admins
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"

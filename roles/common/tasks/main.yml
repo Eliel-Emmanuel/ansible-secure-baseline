@@ -8,3 +8,7 @@
 - name: Heure et synchronisation
   ansible.builtin.import_tasks: temps.yml
   tags: temps
+
+- name: Comptes d'administration
+  ansible.builtin.import_tasks: comptes.yml
+  tags: comptes

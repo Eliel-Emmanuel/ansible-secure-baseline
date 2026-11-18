@@ -16,3 +16,13 @@ common_ntp_serveurs:
   - 0.pool.ntp.org
   - 1.pool.ntp.org
   - 2.pool.ntp.org
+
+
+# Comptes d'administration
+common_admins: []
+
+# Groupe qui donne les droits sudo
+common_groupe_admins: admins
+
+# Sûr par défaut : sudo demande un mot de passe
+common_sudo_sans_mot_de_passe: false

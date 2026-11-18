@@ -4,3 +4,12 @@ environnement: dev
 
 # Mot de passe du compte d'administration
 admin_mot_de_passe: "{{ vault_password }}"
+
+common_sudo_sans_mot_de_passe: true
+
+# Comptes d'administration
+common_admins:
+  - nom: emmanuel
+    commentaire: "Emmanuel Apovo"
+    mot_de_passe: "{{ admin_mot_de_passe }}"
+    cle_ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFbIqFEYAHvQHH3l2i+97Na3MslWQrvpTY6JtyUezCQx emmanuel@labo-ansible"
