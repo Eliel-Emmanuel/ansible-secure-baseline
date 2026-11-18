@@ -1,3 +1,4 @@
+---
 - name: Définir le fuseau horaire
   community.general.timezone:
     name: "{{ common_fuseau_horaire }}"
