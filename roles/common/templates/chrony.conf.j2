@@ -1,0 +1,10 @@
+{{ ansible_managed | comment }}
+
+# Serveurs de temps
+{% for serveur in common_ntp_serveurs %}
+server {{ serveur }} iburst
+{% endfor %}
+
+driftfile /var/lib/chrony/chrony.drift
+makestep 1.0 3
+rtcsync

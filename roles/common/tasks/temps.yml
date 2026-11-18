@@ -1,0 +1,25 @@
+- name: Définir le fuseau horaire
+  community.general.timezone:
+    name: "{{ common_fuseau_horaire }}"
+    
+- name: Installer chrony
+  ansible.builtin.apt:
+    name: chrony
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Déployer la configuration de chrony
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: /etc/chrony/chrony.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Redémarrer chrony
+
+- name: Garantir que chrony est démarré et activé au démarrage
+  ansible.builtin.systemd_service:
+    name: chrony
+    state: started
+    enabled: true

@@ -1,0 +1,7 @@
+---
+- name: Appliquer le socle commun à tous les serveurs
+  hosts: all
+  become: true
+  roles:
+    - role: common
+      tags: common

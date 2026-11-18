@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/common
+- name: Redémarrer chrony
+  ansible.builtin.systemd_service:
+    name: chrony
+    state: restarted

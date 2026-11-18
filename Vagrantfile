@@ -25,7 +25,6 @@ COMMON = <<~SHELL
   set -euo pipefail
   sed -i '/lab\\.test/d' /etc/hosts
   echo "$LAB_HOSTS" >> /etc/hosts
-  timedatectl set-timezone Africa/Lagos
 SHELL
 
 MANAGED = <<~SHELL
