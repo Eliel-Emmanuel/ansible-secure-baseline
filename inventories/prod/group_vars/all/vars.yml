@@ -1,0 +1,6 @@
+---
+# Environnement de développement
+environnement: prod
+
+# Mot de passe du compte d'administration
+admin_mot_de_passe: "{{ vault_password }}"
