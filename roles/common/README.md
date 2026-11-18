@@ -1,38 +1,57 @@
-Role Name
-=========
+# Rôle `common`
 
-A brief description of the role goes here.
+Socle commun appliqué à **tous les serveurs** du projet, avant leur rôle spécifique : paquets de base, fuseau horaire et synchronisation de l'heure avec chrony.
 
-Requirements
-------------
+## Prérequis
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ubuntu 24.04 (Noble)
+- La collection `community.general`, pour le module `timezone` (listée dans `requirements.yml`)
+- Un accès à Internet en UDP sur le port 123, pour joindre les serveurs de temps
 
-Role Variables
---------------
+## Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Valeur par défaut | Description |
+| --- | --- | --- |
+| `common_paquets` | `curl`, `vim`, `htop`, `tree`, `jq`, `unzip`, `ca-certificates` | Paquets installés sur tous les serveurs |
+| `common_fuseau_horaire` | `Africa/Lagos` | Fuseau horaire des serveurs |
+| `common_ntp_serveurs` | `0`, `1` et `2.pool.ntp.org` | Serveurs de temps utilisés par chrony |
 
-Dependencies
-------------
+## Tags
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+| Tag | Partie du rôle |
+| --- | --- |
+| `paquets` | Installation des paquets de base |
+| `temps` | Fuseau horaire et chrony |
 
-Example Playbook
-----------------
+Exemple : `ansible-playbook playbooks/site.yml --tags temps` n'applique que la partie heure.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Dépendances
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+Aucune.
 
-License
--------
+## Exemple d'utilisation
 
-BSD
+```yaml
+- name: Appliquer le socle commun à tous les serveurs
+  hosts: all
+  become: true
+  roles:
+    - role: common
+      tags: common
+```
 
-Author Information
-------------------
+Pour changer une valeur, la définir dans l'inventaire plutôt que dans le rôle, par exemple dans `inventories/prod/group_vars/all/vars.yml`.
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+## Comportement
+
+- Le fichier `/etc/chrony/chrony.conf` est entièrement géré par ce rôle : toute modification manuelle sera écrasée au prochain passage.
+- chrony n'est redémarré que si sa configuration change.
+- Le rôle est idempotent : un second passage ne modifie rien.
+
+## Licence
+
+MIT
+
+## Auteur
+
+Emmanuel Apovo
