@@ -26,3 +26,5 @@ common_groupe_admins: admins
 
 # Sûr par défaut : sudo demande un mot de passe
 common_sudo_sans_mot_de_passe: false
+
+common_motd_environnement: "{{ environnement | default('non défini') }}"

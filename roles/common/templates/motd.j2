@@ -1,0 +1,10 @@
+{{ ansible_managed | comment }}
+
+  Serveur       : {{ inventory_hostname }}
+  Environnement : {{ common_motd_environnement | upper }}
+  Groupes       : {{ group_names | join(', ') }}
+  Système       : {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}
+{% if common_motd_environnement == 'prod' %}
+
+  ATTENTION : serveur de PRODUCTION.
+{% endif %}
